@@ -22,19 +22,14 @@ def get_betting_forecast():
 
     # This will need changing. At the moment it is a hard-coded slection on which card to
     # find all the matches against.
-    betting_forecast_list = pattern.findall(betting_forecast[0])
-    return betting_forecast_list
+    betting_forecast_dict = {}
 
-def temp(list):
-    newlist = []
-
-    for entry in list:
-        newlist.append((entry[1], entry[2]))
-    return newlist
+    # Create a dictionary of the betting forecast.
+    for entry in pattern.findall(betting_forecast[0]):
+        betting_forecast_dict[entry[1]] = entry[2]
+    return betting_forecast_dict
 
 if __name__ == '__main__':
-    betting_forecast_list = get_betting_forecast()
-    list = temp(betting_forecast_list)
-    odds, name = list[0]
-    print("The odds are '%s', the name is '%s'" % (odds, name))
-    print(betting_forecast_list[0][2])
+    betting_forecast_dict = get_betting_forecast()
+    for name, odds in betting_forecast_dict.items():
+        print(name, odds)
