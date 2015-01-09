@@ -3,7 +3,7 @@ from datetime import date
 import re
 import requests
 
-def get_todays_horse_racing_cards():
+def get_todays_racecards():
     """
     Return a list of dictionaries containing the keys 'name' and 'link' for
     the racecards of each of todays races.
@@ -56,7 +56,7 @@ def get_betting_forecast(racecard):
 
 if __name__ == '__main__':
     # Get a list of todays racecards.
-    racecards = get_todays_horse_racing_cards()
+    racecards = get_todays_racecards()
 
     betting_forecast_dict = get_betting_forecast(racecards[1])
     for name, odds in betting_forecast_dict.items():
