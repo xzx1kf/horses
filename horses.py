@@ -57,6 +57,8 @@ def get_race_title(soup):
     """Return the race title"""
     for a in soup.select('table.raceHead td.raceTitle strong.uppercase a'):
         print(a.get_text())
+        race = Race(a.get_text())
+        print(race.get_name())
 
 def parse(racecard):
     root_url = 'http://racingpost.com'
@@ -85,6 +87,9 @@ class Meeting():
 class Race():
     def __init__(self, name):
         self.name = name
+
+    def get_name(self):
+        return self.name
 
 class Horse():
     def __init__(self, name):
