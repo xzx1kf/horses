@@ -6,7 +6,7 @@ import requests
 def get_todays_racecards():
     """
     Return a list of dictionaries containing the keys 'name' and 'link' for
-    the racecards of each of todays races.
+    the race cards of each of todays races.
     """
     index_url = 'http://www.racingpost.com/horses2/cards/home.sd?r_date=$DATE$'
     index_url = index_url.replace('$DATE$', date.today().isoformat())
@@ -26,7 +26,7 @@ def get_todays_racecards():
             name = a.get_text()
 
         # If either the name or link is missing, then it isn't a valid
-        # racecard. So don't add it to the list. Otherwise add it.
+        # race card. So don't add it to the list. Otherwise add it.
         if len(link) is not 0 and len(name) is not 0:
             racecard = {}
             racecard['name'] = name
@@ -77,6 +77,18 @@ def parse(racecard):
 
         import sys
         sys.exit(0)
+
+class Meeting():
+    def __init__(self, name):
+        self.name = name
+
+class Race():
+    def __init__(self, name):
+        self.name = name
+
+class Horse():
+    def __init__(self, name):
+        self.name = name
 
 if __name__ == '__main__':
     # Get a list of todays race cards.
