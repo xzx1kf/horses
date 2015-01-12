@@ -1,0 +1,12 @@
+Meeting
+    Name
+    Going
+
+Race
+    Name
+    Type (Handicap, Stakes)
+
+Horse
+    Name
+    Weight
+    Forecast Odds

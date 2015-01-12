@@ -79,11 +79,11 @@ def parse(racecard):
         sys.exit(0)
 
 if __name__ == '__main__':
-    # Get a list of todays racecards.
-    # These aren't racecards. This in a dictionary of meeting name,
+    # Get a list of todays race cards.
+    # These aren't race cards. This in a dictionary of meeting name,
     # and a link to the full list of races.
     racecards = get_todays_racecards()
 
-    # parse racecard
+    # parse race card
     for racecard in racecards:
         parse(racecard)
