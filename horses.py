@@ -12,23 +12,26 @@ def get_todays_racecards():
     index_url = index_url.replace('$DATE$', date.today().isoformat())
     response = requests.get(index_url)
     soup = BeautifulSoup(response.text)
-    # Get a list of all the meetings and the links to their racecards.
-    links = ([a.attrs.get('href') for a in soup.select('div.crBlock p.bull.show a')])
 
-    # Remove not standard racecard links:
-    #   ww - Worldwide Stakes Races
-    for link in links:
-        if link.endswith('ww'):
-            links.remove(link)
-
-    meetings = ([a.get_text() for a in soup.select('td.meeting h3 a')])
+    crBlocks = soup.select('div.crBlock')
 
     racecards = []
-    for meeting in meetings:
-        racecard = {}
-        racecard['name'] = meeting
-        racecard['link'] = links[meetings.index(meeting)]
-        racecards.append(racecard)
+    for race in crBlocks:
+        link = ''
+        name = ''
+        for a in race.select('p.bull.show a'):
+            link = a.attrs.get('href')
+
+        for a in race.select('td.meeting h3 a'):
+            name = a.get_text()
+
+        # If either the name or link is missing, then it isn't a valid
+        # racecard. So don't add it to the list. Otherwise add it.
+        if len(link) is not 0 and len(name) is not 0:
+            racecard = {}
+            racecard['name'] = name
+            racecard['link'] = link
+            racecards.append(racecard)
 
     return racecards
 
@@ -58,7 +61,7 @@ if __name__ == '__main__':
     # Get a list of todays racecards.
     racecards = get_todays_racecards()
 
-    betting_forecast_dict = get_betting_forecast(racecards[1])
+    betting_forecast_dict = get_betting_forecast(racecards[0])
     for name, odds in betting_forecast_dict.items():
         print(name, odds)
 
