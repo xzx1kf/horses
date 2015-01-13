@@ -66,8 +66,18 @@ def is_handicap(race_title):
     term = 'handicap'
     race_title = race_title.lower()
     words = race_title.split()
-
     return term in words
+
+def parse_horses(racecard):
+    horses = racecard.select('tr.cr')
+    for horse in horses:
+        name = horse.select('td.h a')
+        name = [a.get_text() for a in name][0]
+        weight = horse.select('td')[4].get_text()
+        number = horse.select('td.t strong')[0].get_text()
+        print(number, name, weight)
+
+
 
 def parse(racecard):
     root_url = 'http://racingpost.com'
@@ -94,6 +104,8 @@ def parse(racecard):
 
             meeting.add_race(race)
             print(race.name)
+
+            parse_horses(racecard)
 
             # Get the betting forecast
             betting_forecast_dict = get_betting_forecast(racecard)
