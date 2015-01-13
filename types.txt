@@ -1,0 +1,19 @@
+Group
+    Group 1,2 and 3. The highest class of race.
+
+Listed
+    Just below group class
+
+Rated Stakes
+    Valuable hadicaps with a 10 to 14lb weight range
+
+Conditions Stakes
+    Races for horses beow class A.
+
+Classified Stakes
+    Races with a max rating for horses that have run at least 3 times, or run twice and won at least once.
+
+Handicap
+    Races where the weight a horse has to carry is determined by the official handicapper. The better the horse, the higher its handicap rating. Horse cna only run in races where the mez rating is higher or equal to its rating.
+
+

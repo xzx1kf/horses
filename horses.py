@@ -56,9 +56,18 @@ def get_betting_forecast(soup):
 def get_race_title(soup):
     """Return the race title"""
     for a in soup.select('table.raceHead td.raceTitle strong.uppercase a'):
-        print(a.get_text())
-        race = Race(a.get_text())
-        print(race.get_name())
+        return a.get_text()
+
+def get_meeting_going(soup):
+    going = soup.select('div.raceInfo.clearfix p')
+    return going[0].contents[2].lstrip().split('(', 1)[0].rstrip()
+
+def is_handicap(race_title):
+    term = 'handicap'
+    race_title = race_title.lower()
+    words = race_title.split()
+
+    return term in words
 
 def parse(racecard):
     root_url = 'http://racingpost.com'
@@ -66,34 +75,69 @@ def parse(racecard):
     response = requests.get(index_url)
     soup = BeautifulSoup(response.text)
 
+    # Get the going for the meet.
+    going = get_meeting_going(soup)
+
+    # Create a meeting and
+    meeting = Meeting(racecard['name'], going)
+
     racecards = soup.select('div.cardBlock.lightCards')
 
+    print(meeting.name)
+
+    count = 0
     for racecard in racecards:
         # Get race title
-        get_race_title(racecard)
+        race = Race(get_race_title(racecard))
 
-        # Get the betting forecast
-        betting_forecast_dict = get_betting_forecast(racecard)
-        for name, odds in betting_forecast_dict.items():
-            print(name, odds)
+        if is_handicap(race.name):
 
-        import sys
-        sys.exit(0)
+            meeting.add_race(race)
+            print(race.name)
+
+            # Get the betting forecast
+            betting_forecast_dict = get_betting_forecast(racecard)
+            for name, odds in betting_forecast_dict.items():
+                print(name, odds)
+
+            break
+            """
+            count += 1
+
+            if count >= 2:
+                import sys
+                sys.exit(0)
+            """
+
 
 class Meeting():
-    def __init__(self, name):
+    races = []
+    def __init__(self, name, going):
         self.name = name
+        self.going = going
+
+    def add_race(self, race):
+        self.races.append(race)
+
+    def going(self):
+        return self.going
+
+    def name(self):
+        return self.name
+
 
 class Race():
     def __init__(self, name):
         self.name = name
 
-    def get_name(self):
+    def name(self):
         return self.name
+
 
 class Horse():
     def __init__(self, name):
         self.name = name
+
 
 if __name__ == '__main__':
     # Get a list of todays race cards.
