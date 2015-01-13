@@ -50,13 +50,17 @@ def get_betting_forecast(soup):
 
     # Create a dictionary of the betting forecast.
     for entry in pattern.findall(betting_forecast[0]):
-        betting_forecast_dict[entry[1]] = entry[2]
+        betting_forecast_dict[entry[2]] = entry[1]
     return betting_forecast_dict
 
 def get_race_title(soup):
     """Return the race title"""
     for a in soup.select('table.raceHead td.raceTitle strong.uppercase a'):
         return a.get_text()
+
+def get_race_distance(racecard):
+    for b in racecard.select('table.raceHead td.raceTitle p b'):
+        return b.get_text()
 
 def get_meeting_going(soup):
     going = soup.select('div.raceInfo.clearfix p')
@@ -70,13 +74,16 @@ def is_handicap(race_title):
 
 def parse_horses(racecard):
     horses = racecard.select('tr.cr')
+    horses_list = []
     for horse in horses:
         name = horse.select('td.h a')
         name = [a.get_text() for a in name][0]
         weight = horse.select('td')[4].get_text()
         number = horse.select('td.t strong')[0].get_text()
-        print(number, name, weight)
-
+        last_run = racecard.find_all(title="Days Since Run")
+        last_run = (last_run[horses.index(horse)].get_text()).strip()
+        horses_list.append(Horse(number, name, weight, last_run))
+    return horses_list
 
 
 def parse(racecard):
@@ -95,60 +102,61 @@ def parse(racecard):
 
     print(meeting.name)
 
-    count = 0
     for racecard in racecards:
         # Get race title
-        race = Race(get_race_title(racecard))
+        race = Race(get_race_title(racecard), get_race_distance(racecard))
 
-        if is_handicap(race.name):
+        #if is_handicap(race.name):
+        if True:
 
             meeting.add_race(race)
-            print(race.name)
 
-            parse_horses(racecard)
+            horses = parse_horses(racecard)
+            race.add_horses(horses)
 
             # Get the betting forecast
             betting_forecast_dict = get_betting_forecast(racecard)
             for name, odds in betting_forecast_dict.items():
-                print(name, odds)
+                for horse in horses:
+                    if horse.name == name:
+                        horse.forecast = odds
 
-            break
-            """
-            count += 1
-
-            if count >= 2:
-                import sys
-                sys.exit(0)
-            """
+    for race in meeting.races:
+        print('\t' + race.name, meeting.going, race.runners, race.distance)
+        for horse in race.horses:
+            print('\t\t' + horse.number, horse.name, horse.forecast, horse.last_run)
 
 
 class Meeting():
-    races = []
     def __init__(self, name, going):
         self.name = name
         self.going = going
+        self.races = []
 
     def add_race(self, race):
         self.races.append(race)
 
-    def going(self):
-        return self.going
-
-    def name(self):
-        return self.name
-
 
 class Race():
-    def __init__(self, name):
+    def __init__(self, name, distance):
         self.name = name
+        self.horses = []
+        self.runners = 0
+        self.distance = distance
 
-    def name(self):
-        return self.name
+    def add_horses(self, horses_list):
+        self.horses = horses_list
+        self.runners = len(horses_list)
+
 
 
 class Horse():
-    def __init__(self, name):
+    def __init__(self, number, name, weight, last_run):
         self.name = name
+        self.number = number
+        self.weight = weight
+        self.forecast = 0
+        self.last_run = last_run
 
 
 if __name__ == '__main__':
