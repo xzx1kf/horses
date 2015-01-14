@@ -62,12 +62,6 @@ def get_betting_forecast(race_soup):
         betting_forecast_dict[entry[2]] = entry[1]
     return betting_forecast_dict
 
-def is_handicap(race_title):
-    term = 'handicap'
-    race_title = race_title.lower()
-    words = race_title.split()
-    return term in words
-
 def parse_horses(racecard):
     horses = racecard.select('tr.cr')
     horses_list = []
@@ -94,6 +88,9 @@ def parse_race(race_url):
 
     raceInfo = race_soup.select('div.raceInfo ul.results li')
 
+    # Time
+    time = race_soup.select('span.navRace span')[0].get_text().strip()
+
     # Going
     going = raceInfo[3].select('strong')
     going = (going[0].get_text()).strip()
@@ -115,7 +112,7 @@ def parse_race(race_url):
             if horse.name.lower() == name.lower():
                 horse.forecast = odds
 
-    return going, distance, runners, horses
+    return time, going, distance, runners, horses
 
 def parse(racecard):
     root_url = 'http://racingpost.com'
@@ -133,11 +130,11 @@ def parse(racecard):
 
         race_url = a.attrs.get('href')
         try:
-            going, distance, runners, horses = parse_race(root_url + race_url)
+            time, going, distance, runners, horses = parse_race(root_url + race_url)
         except:
             continue
 
-        race = Race(race_title, going, distance, runners, horses)
+        race = Race(race_title, time, going, distance, runners, horses)
 
         # Create a meeting and
         meeting.add_race(race)
@@ -156,12 +153,27 @@ class Meeting():
 
 
 class Race():
-    def __init__(self, name, going, distance, runners, horses):
+    def __init__(self, name, time, going, distance, runners, horses):
         self.name = name
         self.horses = horses
         self.runners = runners
         self.going = going
         self.distance = distance
+        self.time = time
+
+    def get_distance_in_yards(self):
+        total = 0
+
+        pattern = re.compile('(\d+)(\w)')
+        for distance in pattern.findall(self.distance):
+            if distance[1] == 'm':
+                total += int(distance[0]) * 8 * 220
+            elif distance[1] == 'f':
+                total += int(distance[0]) * 220
+            elif distance[1] == 'y':
+                total += int(distance[0])
+
+        return total
 
 
 class Horse():
@@ -171,6 +183,14 @@ class Horse():
         self.weight = weight
         self.forecast = 0
         self.last_run = last_run
+
+    def forecast_odds_decimal(self):
+        try:
+            a, b = str(self.forecast).split('/')
+            return (float(a) / float(b)) + 1
+        except:
+            return 0
+
 
 
 if __name__ == '__main__':
