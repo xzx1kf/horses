@@ -68,5 +68,5 @@ if __name__ == '__main__':
                                     if not layem.is_horse_in_top_5_weights(horse):
                                         if layem.horse_last_ran_8_days_ago_or_more(horse):
                                             if layem.forecast_odds_in_range(horse):
-                                                print('\t\t' + horse.number, horse.name, horse.last_run)
+                                                print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
 
