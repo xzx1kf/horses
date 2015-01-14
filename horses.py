@@ -17,6 +17,16 @@ def get_todays_racecards():
 
     racecards = []
     for race in crBlocks:
+        try:
+            code = race.select('table.raceHead td.meeting h3 em')[0].get_text()
+            if code == 'RUK' or code == 'ATR':
+                pass
+            else:
+                continue
+        except:
+            continue
+
+
         link = ''
         name = ''
         for a in race.select('p.bull.show a'):
@@ -35,14 +45,13 @@ def get_todays_racecards():
 
     return racecards
 
-def get_betting_forecast(soup):
+def get_betting_forecast(race_soup):
     """Return the betting forecast as a list."""
-
     # Return a list of all <p> tags that have an id beginning with "bettingForecastContainer".
-    betting_forecast = [a.get_text() for a in soup.select('div.info >  p[id^="bettingForecastContainer"]')]
+    betting_forecast = [a.get_text() for a in race_soup.select('div.info p[id^="bettingForecastContainer"]')]
 
     # The regex pattern matches against the following, "2/1 Horse Name,"
-    pattern = re.compile('((\d+/\d+)\s(.+?)),')
+    pattern = re.compile('((\d+/\d+)\s(.+?))[,.]')
 
     # This will need changing. At the moment it is a hard-coded selection on which card to
     # find all the matches against.
@@ -52,19 +61,6 @@ def get_betting_forecast(soup):
     for entry in pattern.findall(betting_forecast[0]):
         betting_forecast_dict[entry[2]] = entry[1]
     return betting_forecast_dict
-
-def get_race_title(soup):
-    """Return the race title"""
-    for a in soup.select('table.raceHead td.raceTitle strong.uppercase a'):
-        return a.get_text()
-
-def get_race_distance(racecard):
-    for b in racecard.select('table.raceHead td.raceTitle p b'):
-        return b.get_text()
-
-def get_meeting_going(soup):
-    going = soup.select('div.raceInfo.clearfix p')
-    return going[0].contents[2].lstrip().split('(', 1)[0].rstrip()
 
 def is_handicap(race_title):
     term = 'handicap'
@@ -76,15 +72,50 @@ def parse_horses(racecard):
     horses = racecard.select('tr.cr')
     horses_list = []
     for horse in horses:
-        name = horse.select('td.h a')
-        name = [a.get_text() for a in name][0]
-        weight = horse.select('td')[4].get_text()
-        number = horse.select('td.t strong')[0].get_text()
-        last_run = racecard.find_all(title="Days Since Run")
-        last_run = (last_run[horses.index(horse)].get_text()).strip()
+        name = [a.get_text() for a in horse.find(title="Full details about this HORSE")][0].strip()
+        weight = horse.select('td')[4].get_text().strip()
+        number = horse.select('td.t strong')[0].get_text().strip()
+
+        last_run = horse.select('div.horseShortInfo span')
+        try:
+            if len(last_run) == 3:
+                last_run = last_run[2].get_text().strip()
+            else:
+                last_run = last_run[1].get_text().strip()
+        except:
+            last_run = None
         horses_list.append(Horse(number, name, weight, last_run))
     return horses_list
 
+def parse_race(race_url):
+
+    response = requests.get(race_url)
+    race_soup = BeautifulSoup(response.text)
+
+    raceInfo = race_soup.select('div.raceInfo ul.results li')
+
+    # Going
+    going = raceInfo[3].select('strong')
+    going = (going[0].get_text()).strip()
+
+    # Distance
+    distance = raceInfo[2].select('strong')
+    distance = (distance[0].get_text()).strip()
+
+    # Runners
+    runners = raceInfo[1].select('strong')
+    runners = (runners[0].get_text()).strip()
+
+    horses = parse_horses(race_soup)
+
+    # Betting Forecast
+    betting_forecast_dict = get_betting_forecast(race_soup)
+    for name, odds in betting_forecast_dict.items():
+        for horse in horses:
+            if horse.name.lower() == name.lower():
+                horse.forecast = odds
+
+    return going, distance, runners, horses
 
 def parse(racecard):
     root_url = 'http://racingpost.com'
@@ -92,45 +123,32 @@ def parse(racecard):
     response = requests.get(index_url)
     soup = BeautifulSoup(response.text)
 
-    # Get the going for the meet.
-    going = get_meeting_going(soup)
+    meeting = Meeting(racecard['name'])
 
-    # Create a meeting and
-    meeting = Meeting(racecard['name'], going)
+    # Retrieve the links for each of the races.
+    race_links = soup.select('td.raceTitle a')
+    for a in race_links:
 
-    racecards = soup.select('div.cardBlock.lightCards')
+        race_title = a.get_text()
 
-    print(meeting.name)
+        race_url = a.attrs.get('href')
+        try:
+            going, distance, runners, horses = parse_race(root_url + race_url)
+        except:
+            continue
 
-    for racecard in racecards:
-        # Get race title
-        race = Race(get_race_title(racecard), get_race_distance(racecard))
+        race = Race(race_title, going, distance, runners, horses)
 
-        #if is_handicap(race.name):
-        if True:
+        # Create a meeting and
+        meeting.add_race(race)
 
-            meeting.add_race(race)
+    return meeting
 
-            horses = parse_horses(racecard)
-            race.add_horses(horses)
-
-            # Get the betting forecast
-            betting_forecast_dict = get_betting_forecast(racecard)
-            for name, odds in betting_forecast_dict.items():
-                for horse in horses:
-                    if horse.name == name:
-                        horse.forecast = odds
-
-    for race in meeting.races:
-        print('\t' + race.name, meeting.going, race.runners, race.distance)
-        for horse in race.horses:
-            print('\t\t' + horse.number, horse.name, horse.forecast, horse.last_run)
 
 
 class Meeting():
-    def __init__(self, name, going):
+    def __init__(self, name):
         self.name = name
-        self.going = going
         self.races = []
 
     def add_race(self, race):
@@ -138,16 +156,12 @@ class Meeting():
 
 
 class Race():
-    def __init__(self, name, distance):
+    def __init__(self, name, going, distance, runners, horses):
         self.name = name
-        self.horses = []
-        self.runners = 0
+        self.horses = horses
+        self.runners = runners
+        self.going = going
         self.distance = distance
-
-    def add_horses(self, horses_list):
-        self.horses = horses_list
-        self.runners = len(horses_list)
-
 
 
 class Horse():
@@ -165,6 +179,18 @@ if __name__ == '__main__':
     # and a link to the full list of races.
     racecards = get_todays_racecards()
 
+    meetings = []
+
     # parse race card
     for racecard in racecards:
-        parse(racecard)
+        meeting = parse(racecard)
+
+        meetings.append(meeting)
+
+        """
+        print(meeting.name)
+        for race in meeting.races:
+            print('\t' + race.name, race.runners, race.distance)
+            for horse in race.horses:
+                print('\t\t' + horse.number, horse.name, horse.forecast, horse.last_run)
+        """
