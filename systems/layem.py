@@ -37,6 +37,22 @@ class Layem():
         odds = horse.forecast_odds_decimal()
         return odds >= 4 and odds <= 7.5
 
+    def run(self):
+        for meeting in self.meetings:
+            print(meeting.name)
+            for race in meeting.races:
+                if self.is_flat_or_aw(race):
+                    if self.is_handicap(race):
+                        if self.has_11_to_16_runners(race):
+                            if self.check_going(race):
+                                if self.is_distance_less_than_10f(race):
+                                    print('\t' + race.time, race.name, self.is_handicap(race), race.runners, race.distance)
+                                    for horse in race.horses:
+                                        if not self.is_horse_in_top_5_weights(horse):
+                                            if self.horse_last_ran_8_days_ago_or_more(horse):
+                                                if self.forecast_odds_in_range(horse):
+                                                    print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
+
 
 if __name__ == '__main__':
     """
@@ -62,19 +78,4 @@ if __name__ == '__main__':
             for horse in race.horses:
                 print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
 
-    if False:
-        for meeting in meetings:
-            print(meeting.name)
-            for race in meeting.races:
-                if layem.is_flat_or_aw(race):
-                    if layem.is_handicap(race):
-                        if layem.has_11_to_16_runners(race):
-                            if layem.check_going(race):
-                                if layem.is_distance_less_than_10f(race):
-                                    print('\t' + race.time, race.name, layem.is_handicap(race), race.runners, race.distance)
-                                    for horse in race.horses:
-                                        if not layem.is_horse_in_top_5_weights(horse):
-                                            if layem.horse_last_ran_8_days_ago_or_more(horse):
-                                                if layem.forecast_odds_in_range(horse):
-                                                    print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
 
