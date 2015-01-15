@@ -51,22 +51,30 @@ if __name__ == '__main__':
     """
     import pickle
 
-    #pickle.dump(meetings, open('140115', 'wb'))
-    meetings = pickle.load(open('140115', 'rb'))
+    #pickle.dump(meetings, open('150115', 'wb'))
+    meetings = pickle.load(open('150115', 'rb'))
     layem = Layem(meetings)
 
     for meeting in meetings:
         print(meeting.name)
         for race in meeting.races:
-            if layem.is_flat_or_aw(race):
-                if layem.is_handicap(race):
-                    if layem.has_11_to_16_runners(race):
-                        if layem.check_going(race):
-                            if layem.is_distance_less_than_10f(race):
-                                print('\t' + race.time, race.name, layem.is_handicap(race), race.runners, race.distance)
-                                for horse in race.horses:
-                                    if not layem.is_horse_in_top_5_weights(horse):
-                                        if layem.horse_last_ran_8_days_ago_or_more(horse):
-                                            if layem.forecast_odds_in_range(horse):
-                                                print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
+            print('\t' + race.time, race.name, layem.is_handicap(race), race.runners, race.distance)
+            for horse in race.horses:
+                print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
+
+    if False:
+        for meeting in meetings:
+            print(meeting.name)
+            for race in meeting.races:
+                if layem.is_flat_or_aw(race):
+                    if layem.is_handicap(race):
+                        if layem.has_11_to_16_runners(race):
+                            if layem.check_going(race):
+                                if layem.is_distance_less_than_10f(race):
+                                    print('\t' + race.time, race.name, layem.is_handicap(race), race.runners, race.distance)
+                                    for horse in race.horses:
+                                        if not layem.is_horse_in_top_5_weights(horse):
+                                            if layem.horse_last_ran_8_days_ago_or_more(horse):
+                                                if layem.forecast_odds_in_range(horse):
+                                                    print('\t\t' + horse.number, horse.name, horse.last_run, horse.forecast)
 

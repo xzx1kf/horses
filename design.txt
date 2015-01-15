@@ -1,12 +1,8 @@
-Meeting
-    Name
-    Going
-
-Race
-    Name
-    Type (Handicap, Stakes)
-
-Horse
-    Name
-    Weight
-    Forecast Odds
+TODO: 
+    * Add command line arguments to choose between parsing
+      the website or just display the results from the saved
+      objects.
+    * Change the way the layem system is run. There mush be a 
+      better way than loads of if statements.
+    * Start storing data in a database.
+    * Command option to print all the horses out ignoring the system.
