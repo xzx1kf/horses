@@ -51,8 +51,8 @@ if __name__ == '__main__':
     """
     import pickle
 
-    #pickle.dump(meetings, open('150115', 'wb'))
-    meetings = pickle.load(open('150115', 'rb'))
+    #pickle.dump(meetings, open('../data/150115', 'wb'))
+    meetings = pickle.load(open('../data/150115', 'rb'))
     layem = Layem(meetings)
 
     for meeting in meetings:
