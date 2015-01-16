@@ -1,3 +1,5 @@
+#!/bin/python
+
 import argparse
 from datetime import date
 import pickle

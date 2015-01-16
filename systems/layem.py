@@ -25,17 +25,21 @@ class Layem():
                 return True
 
     def is_distance_less_than_10f(self, race):
-        return race.get_distance_in_yards() < 2220
+        return race.get_distance_in_yards() < 2200
 
     def is_horse_in_top_5_weights(self, horse):
         return int(horse.number) in range(6)
 
     def horse_last_ran_8_days_ago_or_more(self, horse):
-        return int(horse.last_run) >= 8
+        try:
+            return int(horse.last_run) >= 8
+        except:
+            return int(horse.last_run.split('(')[0])
+
 
     def forecast_odds_in_range(self, horse):
         odds = horse.forecast_odds_decimal()
-        return odds >= 4 and odds <= 7.5
+        return odds >= 5 and odds <= 8.5
 
     def run(self):
         for meeting in self.meetings:
@@ -46,7 +50,7 @@ class Layem():
                         if self.has_11_to_16_runners(race):
                             if self.check_going(race):
                                 if self.is_distance_less_than_10f(race):
-                                    print('\t' + race.time, race.name, self.is_handicap(race), race.runners, race.distance)
+                                    print('\t' + race.time, race.name, self.is_handicap(race), race.runners, race.get_distance_in_yards())
                                     for horse in race.horses:
                                         if not self.is_horse_in_top_5_weights(horse):
                                             if self.horse_last_ran_8_days_ago_or_more(horse):
