@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+from racing.models import Meeting, Race, Horse
+
+
+def index(request):
+    return render(request, 'racing/index.html', {})
