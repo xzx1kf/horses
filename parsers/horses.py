@@ -69,15 +69,8 @@ def parse_horses(racecard):
         name = [a.get_text() for a in horse.find(title="Full details about this HORSE")][0].strip()
         weight = horse.select('td')[4].get_text().strip()
         number = horse.select('td.t strong')[0].get_text().strip()
-
-        last_run = horse.select('div.horseShortInfo span')
-        try:
-            if len(last_run) == 3:
-                last_run = last_run[2].get_text().strip()
-            else:
-                last_run = last_run[1].get_text().strip()
-        except:
-            last_run = None
+        short_info = horse.select('div.horseShortInfo')
+        last_run = short_info[0].get_text().strip()
         horses_list.append(Horse(number, name, weight, last_run))
     return horses_list
 

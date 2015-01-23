@@ -34,8 +34,12 @@ class Layem():
         try:
             return int(horse.last_run) >= 8
         except:
-            return int(horse.last_run.split('(')[0])
-
+            try:
+                return int(horse.last_run.split('(')[0])
+            except:
+                print("Check out the following horse: " + horse.name)
+                print(horse.last_run)
+                return 0
 
     def forecast_odds_in_range(self, horse):
         odds = horse.forecast_odds_decimal()
