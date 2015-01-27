@@ -1,1 +1,14 @@
-<h1>Hello, World!</h1>
+<form action="{% url 'racing:update' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Update" />
+</form>
+
+{% if meetings %}
+    <ul>
+    {% for meeting in meetings %}
+    <li><a href='{% url 'racing:meeting_detail' meeting.id %}'>{{ meeting.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Nothing</p>
+{% endif %}

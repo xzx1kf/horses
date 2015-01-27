@@ -70,7 +70,11 @@ def parse_horses(racecard):
         weight = horse.select('td')[4].get_text().strip()
         number = horse.select('td.t strong')[0].get_text().strip()
         short_info = horse.select('div.horseShortInfo')
-        last_run = short_info[0].get_text().strip()
+        last_run = 0
+        try:
+            last_run = int(short_info[0].get_text().strip().split('(')[0])
+        except:
+            last_run = 0
         horses_list.append(Horse(number, name, weight, last_run))
     return horses_list
 

@@ -1,0 +1,12 @@
+{% if meeting %}
+<h4>{{ meeting.name }} - {{ meeting.date|date:"l jS F Y" }}</h4>
+    {% if races %}
+        <ul>
+        {% for race in races %}
+        <li>{{ race.date|date:"g:i A" }} -  {{ race.name }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% else %}
+    <h4>Nothing</h4>
+{% endif %}
