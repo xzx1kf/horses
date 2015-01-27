@@ -3,7 +3,7 @@
     {% if races %}
         <ul>
         {% for race in races %}
-        <li>{{ race.date|date:"g:i A" }} -  {{ race.name }}</li>
+        <li>{{ race.date|date:"g:i A" }} -  {{ race.name }} (going: {{ race.going }})</li>
         {% endfor %}
         </ul>
     {% endif %}
