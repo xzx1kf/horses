@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404, get_list_or_404
 from racing.models import Meeting, Race, Horse
 from datetime import datetime
+from django.db.models import Q
 
 
 def index(request):
@@ -12,6 +13,23 @@ def meeting_detail(request, meeting_id):
     meeting = get_object_or_404(Meeting, id=meeting_id)
     races = get_list_or_404(Race, meeting=meeting)
     return render(request, 'racing/meeting_detail.html', {'meeting': meeting, 'races': races})
+
+def layem(request):
+    races = Race.objects.filter(meeting__date=datetime.today())
+    races = races.filter(distance__lte=2200, distance__gte=0)
+    races = races.filter(runners__lte=16, runners__gte=11)
+    races = races.filter(name__icontains='handicap')
+    races = races.filter(
+        Q(going__icontains='standard') | Q(going__icontains='good')
+    )
+    races = races.exclude(name__icontains='chase').exclude(name__icontains='hurdle')
+
+    for race in races:
+        race.horses = race.horses.exclude(number__lte=5)
+        race.horses = race.horses.filter(last_run__gte=8)
+        race.horses = race.horses.filter(forecast__gte=5, forecast__lte=8.5)
+
+    return render(request, 'racing/layem.html', {'races': races})
 
 def update(request):
     # For a waiting page use celery.
@@ -34,7 +52,8 @@ def update(request):
                 distance=yards,
                 going=race.going,
                 meeting=m,
-                name=race.name)
+                name=race.name,
+                runners=race.runners)
             r.save()
 
             for horse in race.horses:
@@ -48,4 +67,5 @@ def update(request):
 
                 r.horses.add(h)
 
+    meetings = Meeting.objects.all()
     return render(request, 'racing/index.html', { "meetings": meetings })
