@@ -1,17 +1,20 @@
 {% if races %}
     <ul>
     {% for race in races %}
-    <li>{{ race.date|date:"g:i A" }} - {{ race.name }}</li> 
+    {% if race.horses.all|length != 0 %}
+        <li>{{ race.date|date:"g:i A" }} - {{ race.name }}</li> 
         <ul>
             <li>distance: {{ race.distance }} yards</li>
             <li>going: {{ race.going }}</li>
             <li>runners: {{ race.runners }}</li>
+            <li>{{ race.meeting }}</li>
             <ul>
             {% for horse in race.horses.all %}
             <li>{{ horse.number }} - {{ horse.name|lower|capfirst }} - odds:{{ horse.forecast }}- ran:{{ horse.last_run }}</li>
             {% endfor %}
             </ul>
         </ul>
+    {% endif %}
     {% endfor %}
     </ul>
 {% else %}

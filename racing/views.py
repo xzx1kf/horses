@@ -1,9 +1,9 @@
+from django.db.models import Q
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, get_list_or_404
-from racing.models import Meeting, Race, Horse
+from django.utils import timezone
 from datetime import datetime
-from django.db.models import Q
-
+from racing.models import Meeting, Race, Horse
 
 def index(request):
     meetings = Meeting.objects.all()
@@ -16,7 +16,7 @@ def meeting_detail(request, meeting_id):
 
 def layem(request):
     races = Race.objects.filter(meeting__date=datetime.today())
-    races = races.filter(distance__lte=2200, distance__gte=0)
+    races = races.filter(distance__lt=2200, distance__gte=0)
     races = races.filter(runners__lte=16, runners__gte=11)
     races = races.filter(name__icontains='handicap')
     races = races.filter(
@@ -46,7 +46,7 @@ def update(request):
         for race in meeting.races:
             yards = race.get_distance_in_yards()
             rtime = datetime.strptime(race.time + " pm", "%I:%M %p")
-            rdate = datetime.today().date()
+            rdate = timezone.today().date()
             r = Race(
                 date=datetime.combine(rdate, rtime.time()),
                 distance=yards,
