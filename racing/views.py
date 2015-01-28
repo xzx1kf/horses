@@ -1,7 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, get_list_or_404
-from django.utils import timezone
 from datetime import datetime
 from racing.models import Meeting, Race, Horse
 
@@ -46,7 +45,7 @@ def update(request):
         for race in meeting.races:
             yards = race.get_distance_in_yards()
             rtime = datetime.strptime(race.time + " pm", "%I:%M %p")
-            rdate = timezone.today().date()
+            rdate = datetime.today().date()
             r = Race(
                 date=datetime.combine(rdate, rtime.time()),
                 distance=yards,
