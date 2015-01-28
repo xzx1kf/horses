@@ -1,12 +1,20 @@
 from django.db.models import Q
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, get_list_or_404
-from datetime import datetime
+from datetime import datetime, timedelta
 from racing.models import Meeting, Race, Horse
+from collections import OrderedDict
 
 def index(request):
-    meetings = Meeting.objects.all()
-    return render(request, 'racing/index.html', {"meetings": meetings})
+    meetings = Meeting.objects.filter(date__gte=(datetime.today() - timedelta(days=2)))
+    meeting_dates = set([m.date for m in meetings])             # Create a set of meeting dates.
+    meetings_separated = dict([(d, []) for d in meeting_dates]) # Initialise an empty list for each date.
+    for d in meeting_dates:                                     # Separate out the meetings into a
+        for m in meetings:                                      # dictionary by index date with a list of meetings.
+            if m.date == d:
+                meetings_separated[d].append(m)
+    meetings_separated = OrderedDict(sorted(meetings_separated.items(), reverse=True))
+    return render(request, 'racing/index.html', {"meetings_separated": meetings_separated})
 
 def meeting_detail(request, meeting_id):
     meeting = get_object_or_404(Meeting, id=meeting_id)

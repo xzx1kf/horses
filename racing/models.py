@@ -8,6 +8,9 @@ class Meeting(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['date', 'name']
+
 
 class Horse(models.Model):
     forecast = models.DecimalField(default=0, max_digits=4, decimal_places=1)
@@ -18,6 +21,9 @@ class Horse(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['number']
 
 
 class Race(models.Model):
@@ -31,3 +37,6 @@ class Race(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['date']
