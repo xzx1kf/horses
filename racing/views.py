@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 from datetime import datetime, timedelta
 from racing.models import Meeting, Race, Horse
@@ -74,5 +74,11 @@ def update(request):
 
                 r.horses.add(h)
 
-    meetings = Meeting.objects.all()
-    return render(request, 'racing/index.html', { "meetings": meetings })
+    return redirect('racing:index')
+
+def delete_todays_meetings(request):
+    meetings = Meeting.objects.filter(date=datetime.today().date())
+    for meeting in meetings:
+        meeting.delete()
+
+    return redirect('racing:index')

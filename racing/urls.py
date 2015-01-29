@@ -7,4 +7,5 @@ urlpatterns = patterns('',
                        url(r'^layem/$', views.layem, name='layem'),
                        url(r'^(?P<meeting_id>\d+)/$', views.meeting_detail, name='meeting_detail'),
                        url(r'^update/$', views.update, name='update'),
+                       url(r'^delete_todays_meetings/$', views.delete_todays_meetings, name='delete_todays_meetings'),
 )

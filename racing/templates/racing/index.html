@@ -3,6 +3,12 @@
     <input type="submit" value="Update" />
 </form>
 
+
+<form action="{% url 'racing:delete_todays_meetings' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Delete">
+</form>
+
 {% if meetings_separated %}
     {% for day, meetings in meetings_separated.items %}
         <h4>{{ day }}</h4>
